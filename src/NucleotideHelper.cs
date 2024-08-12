@@ -1,4 +1,4 @@
-﻿namespace Genome.Biology;
+﻿namespace GenLabs.DnaUtils;
 
 public static class NucleotideHelper
 {

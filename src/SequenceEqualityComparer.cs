@@ -1,4 +1,4 @@
-﻿namespace Genome.Biology;
+﻿namespace GenLabs.DnaUtils;
 
 internal sealed class SequenceEqualityComparer : IEqualityComparer<Sequence>
 {

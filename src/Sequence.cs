@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Genome.Biology;
+namespace GenLabs.DnaUtils;
 
 /// <summary>
 /// Represents a sequence of nucleotides.

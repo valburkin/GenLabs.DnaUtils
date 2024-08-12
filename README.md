@@ -1,4 +1,4 @@
-# Genome.Biology
+# GenLabs.DnaUtils
 
 C# library designed to facilitate the analysis and manipulation of genomic sequences. It provides a comprehensive set of tools for working with nucleotide sequences, including operations such as finding k-mers, calculating sequence skew, and determining Hamming distances. The library is optimized for performance and ease of use, making it suitable for both research and educational purposes.
 
