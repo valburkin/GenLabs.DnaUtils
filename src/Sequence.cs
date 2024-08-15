@@ -446,7 +446,7 @@ public sealed class Sequence : IEquatable<Sequence>
         var nucleotides = new Nucleotide[sequence.Length];
         for (var i = 0; i < sequence.Length; i++)
         {
-            nucleotides[i] = sequence[i].ToNucleotide();
+            nucleotides[i] = char.ToUpper(sequence[i]).ToNucleotide();
 
             if (_nucleotideCounts.TryGetValue(nucleotides[i], out var count))
             {
