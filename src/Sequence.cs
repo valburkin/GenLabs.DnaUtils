@@ -136,42 +136,73 @@ public sealed class Sequence : IEquatable<Sequence>
     /// Returns a dictionary of k-mers and their locations in the <see cref="Sequence"/>.
     /// </summary>
     /// <param name="k">The length of the k-mer.</param>
-    /// <param name="mismatches">The maximum number of mismatches allowed.</param>
-    /// <param name="treatReverseComplementsAsEqual">Whether to consider reverse complements.</param>
     /// <returns>A dictionary of k-mers and their locations in the <see cref="Sequence"/>.</returns>
-    public Dictionary<Sequence, List<int>> CountKMers(int k, int mismatches = 0, bool treatReverseComplementsAsEqual = false)
+    public Dictionary<Sequence, List<int>> FindAllKMers(int k)
     {
         var counts = new Dictionary<Sequence, List<int>>(new SequenceEqualityComparer());
 
         for (var i = 0; i <= _sequence.Length - k; i++)
         {
             var subsequence = Part(i, k);
-            
-            CountWithWobbles(subsequence, i);
 
-            if (treatReverseComplementsAsEqual)
+            if (counts.TryGetValue(subsequence, out var positions))
             {
-                CountWithWobbles(subsequence.ReverseComplement(), i);
+                positions.Add(i);
+            }
+            else
+            {
+                counts[subsequence] = [i];
             }
         }
 
         return counts;
+    }
 
-        void CountWithWobbles(Sequence pattern, int index)
+    /// <summary>
+    /// Returns a dictionary of k-mers and their locations in the <see cref="Sequence"/>.
+    /// </summary>
+    /// <param name="k">The length of the k-mer.</param>
+    /// <param name="mismatches">The maximum number of mismatches allowed.</param>
+    /// <param name="treatReverseComplementsAsEqual">Whether to consider reverse complements.</param>
+    /// <returns>A dictionary of k-mers and their locations in the <see cref="Sequence"/>.</returns>
+    public Dictionary<Sequence, List<int>> FindAllKMers(int k, int mismatches, bool treatReverseComplementsAsEqual)
+    {
+        var allKMers = FindAllKMers(k);
+
+        if (treatReverseComplementsAsEqual)
         {
-            var wobbles = pattern.Wobbles(mismatches);
-            foreach (var wobble in wobbles)
+            var reversedKMers = new Dictionary<Sequence, List<int>>(new SequenceEqualityComparer());
+            foreach (var (kMer, positions) in allKMers)
             {
-                if (counts.TryGetValue(wobble, out var indexes))
-                {
-                    indexes.Add(index);
-                }
-                else
-                {
-                    counts[wobble] = [index];
-                }
+                var reverseComplement = kMer.ReverseComplement();
+                reversedKMers[reverseComplement] = positions;
+            }
+
+            foreach (var (reversedKMer, positions) in reversedKMers)
+            {
+                allKMers[reversedKMer] = positions;
             }
         }
+
+        if (mismatches > 0)
+        {
+            var wobbledKMers = new Dictionary<Sequence, List<int>>(new SequenceEqualityComparer());
+            foreach (var (kMer, positions) in allKMers)
+            {
+                var wobbles = kMer.Wobbles(mismatches);
+                foreach (var wobble in wobbles)
+                {
+                    wobbledKMers[wobble] = positions;
+                }
+            }
+
+            foreach (var (wobbledKMer, positions) in wobbledKMers)
+            {
+                allKMers[wobbledKMer] = positions;
+            }
+        }
+
+        return allKMers;
     }
 
     /// <summary>
@@ -184,7 +215,7 @@ public sealed class Sequence : IEquatable<Sequence>
     public Sequence[] FindClumpingKMers(int windowSize, int k, int threshold)
     {
         var clumpingKMers = new List<Sequence>();
-        foreach (var (kMer, positions) in CountKMers(k))
+        foreach (var (kMer, positions) in FindAllKMers(k))
         {
             if (positions.Count < threshold)
             {
@@ -289,12 +320,12 @@ public sealed class Sequence : IEquatable<Sequence>
     }
 
     /// <summary>
-    /// Use to find the wobbled pattern in the sequence.
+    /// Use to find the pattern in the sequence. May consider wobbles.
     /// </summary>
     /// <param name="pattern">The pattern <see cref="Sequence"/> to find.</param>
-    /// <param name="mismatches">The maximum number of mismatches allowed in the pattern.</param>
+    /// <param name="mismatches">The maximum number of mismatches (wobbles) allowed in the pattern.</param>
     /// <returns>An array of positions where the pattern is found.</returns>
-    public int[] FindWobbledPatternLocations(Sequence pattern, int mismatches)
+    public int[] FindPatternLocations(Sequence pattern, int mismatches = 0)
     {
         var positions = new List<int>();
         for (var i = 0; i <= Length - pattern.Length; i++)
