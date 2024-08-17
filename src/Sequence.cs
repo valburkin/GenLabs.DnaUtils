@@ -3,12 +3,16 @@
 namespace GenLabs.DnaUtils;
 
 /// <summary>
-/// Represents a sequence of nucleotides.
+/// Represents a sequence of <see cref="Nucleotide"/>s.
 /// </summary>
 public sealed class Sequence : IEquatable<Sequence>
 {
     private readonly Nucleotide[] _sequence;
-    private readonly Dictionary<Nucleotide, int> _nucleotideCounts = new();
+
+    /// <summary>
+    /// The <see cref="NucleotideCount"/> of the <see cref="Sequence"/>.
+    /// </summary>
+    public NucleotideCount Counts { get; }
 
     /// <summary>
     /// The length of the <see cref="Sequence"/>.
@@ -19,9 +23,10 @@ public sealed class Sequence : IEquatable<Sequence>
     /// Instantiates a <see cref="Sequence"/> from an array of <see cref="Nucleotide"/>s.
     /// </summary>
     /// <param name="sequence">The array of <see cref="Nucleotide"/>s.</param>
-    public Sequence(Nucleotide[] sequence)
+    public Sequence(IReadOnlyList<Nucleotide> sequence)
     {
-        _sequence = sequence;
+        _sequence = sequence.ToArray();
+        Counts = new(sequence);
     }
 
     /// <summary>
@@ -29,9 +34,8 @@ public sealed class Sequence : IEquatable<Sequence>
     /// </summary>
     /// <param name="sequence">The string to convert to a <see cref="Sequence"/>.</param>
     public Sequence(string sequence)
-    {
-        _sequence = GetNucleotides(sequence);
-    }
+        : this(GetNucleotides(sequence))
+    { }
 
     /// <summary>
     /// Returns a part of the <see cref="Sequence"/>>.
@@ -239,23 +243,6 @@ public sealed class Sequence : IEquatable<Sequence>
     }
 
     /// <summary>
-    /// Counts the number of occurrences of a nucleotide in the sequence.
-    /// </summary>
-    /// <param name="nucleotide">The <see cref="Nucleotide"/> to count.</param>
-    /// <returns>The number of occurrences of the nucleotide in the sequence.</returns>
-    public int Count(Nucleotide nucleotide)
-    {
-        if (_nucleotideCounts.TryGetValue(nucleotide, out var count))
-        {
-            return count;
-        }
-
-        count = _sequence.Count(n => n == nucleotide);
-
-        return _nucleotideCounts[nucleotide] = count;
-    }
-
-    /// <summary>
     /// Use to find the skew of the sequence for all nucleotides.
     /// The skew is the difference between the count of <see cref="Nucleotide.G"/> and <see cref="Nucleotide.C"/>.
     /// </summary>
@@ -441,21 +428,12 @@ public sealed class Sequence : IEquatable<Sequence>
         return hash;
     }
 
-    private Nucleotide[] GetNucleotides(string sequence)
+    private static Nucleotide[] GetNucleotides(string sequence)
     {
         var nucleotides = new Nucleotide[sequence.Length];
         for (var i = 0; i < sequence.Length; i++)
         {
             nucleotides[i] = char.ToUpper(sequence[i]).ToNucleotide();
-
-            if (_nucleotideCounts.TryGetValue(nucleotides[i], out var count))
-            {
-                _nucleotideCounts[nucleotides[i]] = count + 1;
-            }
-            else
-            {
-                _nucleotideCounts[nucleotides[i]] = 1;
-            }
         }
 
         return nucleotides;
