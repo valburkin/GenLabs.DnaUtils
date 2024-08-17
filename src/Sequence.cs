@@ -90,6 +90,29 @@ public sealed class Sequence : IEquatable<Sequence>
     public static implicit operator Sequence(string sequence) => new(sequence);
 
     /// <summary>
+    /// Generates all possible <see cref="Sequence"/>s of a given length.
+    /// IMPORTANT: Note that possible number of sequences grows exponentially with the length: 4^length.
+    /// For example, for length 3, there are 64 possible sequences.
+    /// For length 10, there are 1,048,576 possible sequences.
+    /// </summary>
+    /// <param name="length">The length of the sequences.</param>
+    /// <returns>All possible <see cref="Sequence"/>s of the given length.</returns>
+    public static IEnumerable<Sequence> AllMutations(int length)
+    {
+        var numberOfMutations = 1 << (2 * length);
+        for (var i = 0; i < numberOfMutations; i++)
+        {
+            var sequence = new Nucleotide[length];
+            for (var j = 0; j < length; j++)
+            {
+                sequence[j] = NucleotideHelper.All[(i >> (2 * j)) & 3];
+            }
+
+            yield return new Sequence(sequence);
+        }
+    }
+
+    /// <summary>
     /// Returns the complement of the sequence.
     /// The complement is the sequence where each <see cref="Nucleotide"/> is replaced by its complement.
     /// </summary>
