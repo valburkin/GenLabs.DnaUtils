@@ -1,11 +1,12 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 
 namespace GenLabs.DnaUtils;
 
 /// <summary>
 /// Represents a sequence of <see cref="Nucleotide"/>s.
 /// </summary>
-public sealed class Sequence : IEquatable<Sequence>
+public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 {
     private readonly Nucleotide[] _sequence;
 
@@ -18,6 +19,11 @@ public sealed class Sequence : IEquatable<Sequence>
     /// The length of the <see cref="Sequence"/>.
     /// </summary>
     public int Length => _sequence.Length;
+
+    /// <summary>
+    /// Same as <see cref="Length"/>. The number of <see cref="Nucleotide"/>s in the <see cref="Sequence"/>.
+    /// </summary>
+    public int Count => _sequence.Length;
 
     /// <summary>
     /// Instantiates a <see cref="Sequence"/> from an array of <see cref="Nucleotide"/>s.
@@ -417,6 +423,8 @@ public sealed class Sequence : IEquatable<Sequence>
         return sb.ToString();
     }
 
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
     public bool Equals(Sequence? other)
     {
         if (other is null)
@@ -438,6 +446,14 @@ public sealed class Sequence : IEquatable<Sequence>
         }
 
         return true;
+    }
+
+    public IEnumerator<Nucleotide> GetEnumerator()
+    {
+        foreach (var nucleotide in _sequence)
+        {
+            yield return nucleotide;
+        }
     }
 
     public override int GetHashCode()
