@@ -11,11 +11,6 @@ public readonly struct NucleotideCount
     private readonly int _t;
 
     /// <summary>
-    /// Gets the total count of <see cref="Nucleotide"/>s.
-    /// </summary>
-    public int Total => _a + _c + _g + _t;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="NucleotideCount"/> struct.
     /// </summary>
     /// <param name="nucleotides">The nucleotides to count.</param>
@@ -42,6 +37,9 @@ public readonly struct NucleotideCount
                     throw new ArgumentOutOfRangeException(nameof(nucleotide));
             }
         }
+
+        Total = nucleotides.Count;
+        Max = GetMax();
     }
 
     /// <summary>
@@ -60,21 +58,28 @@ public readonly struct NucleotideCount
     };
 
     /// <summary>
+    /// Gets the total count of <see cref="Nucleotide"/>s.
+    /// </summary>
+    public int Total { get; }
+
+    /// <summary>
+    /// Gets the maximum <see cref="Nucleotide"/> counts.
+    /// </summary>
+    /// <returns>The <see cref="Nucleotide"/>s that appears the most times and its corresponding counts.</returns>
+    public (Nucleotide Nucleotide, int Count)[] Max { get; }
+
+    /// <summary>
     /// Normalizes the <see cref="NucleotideCount"/> by a factor.
     /// </summary>
     /// <param name="factor">The factor to normalize by.</param>
     /// <returns>The normalized nucleotide count.</returns>
     public NormalizedNucleotideCount Normalize(int factor) => new(this, factor);
 
-    /// <summary>
-    /// Gets the maximum <see cref="Nucleotide"/> counts.
-    /// </summary>
-    /// <returns>The <see cref="Nucleotide"/>s that appears the most times and its corresponding counts.</returns>
-    public (Nucleotide Nucleotide, int Count)[] Max()
+    private (Nucleotide, int)[] GetMax()
     {
         var max = new List<(Nucleotide n, int c)> { (Nucleotide.A, _a) };
 
-        foreach (var n in new []{ Nucleotide.C, Nucleotide.G, Nucleotide.T })
+        foreach (var n in new[] { Nucleotide.C, Nucleotide.G, Nucleotide.T })
         {
             var c = this[n];
 

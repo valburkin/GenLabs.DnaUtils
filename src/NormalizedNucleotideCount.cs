@@ -23,6 +23,9 @@ public readonly struct NormalizedNucleotideCount
         _c = nucleotideCount[Nucleotide.C] / (double) factor;
         _g = nucleotideCount[Nucleotide.G] / (double) factor;
         _t = nucleotideCount[Nucleotide.T] / (double) factor;
+
+        Max = GetMax();
+        Entropy = GetEntropy();
     }
 
     /// <summary>
@@ -44,7 +47,15 @@ public readonly struct NormalizedNucleotideCount
     /// Gets the <see cref="Nucleotide"/>s with the maximum value.
     /// </summary>
     /// <returns>The <see cref="Nucleotide"/>s with the maximum value and their corresponding value.</returns>
-    public (Nucleotide Nucleotide, double Value)[] Max()
+    public (Nucleotide Nucleotide, double Value)[] Max { get; }
+
+    /// <summary>
+    /// Gets the entropy of the <see cref="NormalizedNucleotideCount"/>.
+    /// </summary>
+    /// <returns>The entropy of the <see cref="NormalizedNucleotideCount"/>.</returns>
+    public double Entropy { get; }
+
+    private (Nucleotide, double)[] GetMax()
     {
         var max = new List<(Nucleotide n, double c)> { (Nucleotide.A, _a) };
 
@@ -65,12 +76,8 @@ public readonly struct NormalizedNucleotideCount
 
         return max.ToArray();
     }
-
-    /// <summary>
-    /// Calculates the entropy of the <see cref="NormalizedNucleotideCount"/>.
-    /// </summary>
-    /// <returns>The entropy of the <see cref="NormalizedNucleotideCount"/>.</returns>
-    public double Entropy() => -new[] { _a, _c, _g, _t }
+    
+    private double GetEntropy() => -new[] { _a, _c, _g, _t }
         .Where(v => v > 0)
         .Select(v => v * Math.Log2(v))
         .Sum();
