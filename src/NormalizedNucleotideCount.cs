@@ -51,6 +51,8 @@ public readonly struct NormalizedNucleotideCount
 
     /// <summary>
     /// Gets the entropy of the <see cref="NormalizedNucleotideCount"/>.
+    /// Entropy is a measure of the randomness of nucleotides in the set.
+    /// It is calculated as the sum of the negative of the product of the value of each <see cref="Nucleotide"/> and the logarithm base 2 of the value of each nucleotide.
     /// </summary>
     /// <returns>The entropy of the <see cref="NormalizedNucleotideCount"/>.</returns>
     public double Entropy { get; }
