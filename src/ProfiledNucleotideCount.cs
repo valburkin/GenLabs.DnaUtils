@@ -1,9 +1,11 @@
 ﻿namespace GenLabs.DnaUtils;
 
 /// <summary>
-/// Represents a normalized <see cref="NucleotideCount"/>.
+/// Represents a profiled <see cref="NucleotideCount"/>.
+/// Profiled means that the count of each <see cref="Nucleotide"/> has been normalized by a factor.
+/// Uses Laplace's rule of succession to normalize the count of each <see cref="Nucleotide"/>.
 /// </summary>
-public readonly struct NormalizedNucleotideCount
+public readonly struct ProfiledNucleotideCount
 {
     private const double EqualityTolerance = .001;
 
@@ -13,19 +15,20 @@ public readonly struct NormalizedNucleotideCount
     private readonly double _t;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="NormalizedNucleotideCount"/> struct.
+    /// Initializes a new instance of the <see cref="ProfiledNucleotideCount"/> struct.
     /// </summary>
     /// <param name="nucleotideCount">The <see cref="NucleotideCount"/> to normalize.</param>
     /// <param name="factor">The factor to normalize by.</param>
-    public NormalizedNucleotideCount(NucleotideCount nucleotideCount, int factor)
+    public ProfiledNucleotideCount(NucleotideCount nucleotideCount, int factor)
     {
-        _a = nucleotideCount[Nucleotide.A] / (double) factor;
-        _c = nucleotideCount[Nucleotide.C] / (double) factor;
-        _g = nucleotideCount[Nucleotide.G] / (double) factor;
-        _t = nucleotideCount[Nucleotide.T] / (double) factor;
+        _a = (nucleotideCount[Nucleotide.A] + 1) / ((double) factor + 4);
+        _c = (nucleotideCount[Nucleotide.C] + 1) / ((double) factor + 4);
+        _g = (nucleotideCount[Nucleotide.G] + 1) / ((double) factor + 4);
+        _t = (nucleotideCount[Nucleotide.T] + 1) / ((double) factor + 4);
 
         Max = GetMax();
         Entropy = GetEntropy();
+        Factor = factor;
     }
 
     /// <summary>
@@ -50,12 +53,17 @@ public readonly struct NormalizedNucleotideCount
     public (Nucleotide Nucleotide, double Value)[] Max { get; }
 
     /// <summary>
-    /// Gets the entropy of the <see cref="NormalizedNucleotideCount"/>.
+    /// Gets the entropy of the <see cref="ProfiledNucleotideCount"/>.
     /// Entropy is a measure of the randomness of nucleotides in the set.
     /// It is calculated as the sum of the negative of the product of the value of each <see cref="Nucleotide"/> and the logarithm base 2 of the value of each nucleotide.
     /// </summary>
-    /// <returns>The entropy of the <see cref="NormalizedNucleotideCount"/>.</returns>
+    /// <returns>The entropy of the <see cref="ProfiledNucleotideCount"/>.</returns>
     public double Entropy { get; }
+
+    /// <summary>
+    /// Gets the factor used to normalize the <see cref="NucleotideCount"/>.
+    /// </summary>
+    public int Factor { get; }
 
     private (Nucleotide, double)[] GetMax()
     {

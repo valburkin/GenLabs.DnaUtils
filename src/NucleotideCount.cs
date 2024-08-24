@@ -73,7 +73,7 @@ public readonly struct NucleotideCount
     /// </summary>
     /// <param name="factor">The factor to normalize by.</param>
     /// <returns>The normalized nucleotide count.</returns>
-    public NormalizedNucleotideCount Normalize(int factor) => new(this, factor);
+    public ProfiledNucleotideCount Normalize(int factor) => new(this, factor);
 
     private (Nucleotide, int)[] GetMax()
     {
