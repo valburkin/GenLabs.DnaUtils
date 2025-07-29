@@ -4,16 +4,16 @@ using System.Text;
 namespace GenLabs.DnaUtils;
 
 /// <summary>
-/// Represents a sequence of <see cref="Nucleotide"/>s.
+/// Represents a sequence of <see cref="NBase"/>s.
 /// </summary>
-public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
+public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<NBase>
 {
-    private readonly Nucleotide[] _sequence;
+    private readonly NBase[] _sequence;
 
     /// <summary>
-    /// The <see cref="NucleotideCount"/> of the <see cref="Sequence"/>.
+    /// The <see cref="NBaseCount"/> of the <see cref="Sequence"/>.
     /// </summary>
-    public NucleotideCount Counts { get; }
+    public NBaseCount Counts { get; }
 
     /// <summary>
     /// The length of the <see cref="Sequence"/>.
@@ -21,15 +21,15 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
     public int Length => _sequence.Length;
 
     /// <summary>
-    /// Same as <see cref="Length"/>. The number of <see cref="Nucleotide"/>s in the <see cref="Sequence"/>.
+    /// Same as <see cref="Length"/>. The number of <see cref="NBase"/>s in the <see cref="Sequence"/>.
     /// </summary>
     public int Count => _sequence.Length;
 
     /// <summary>
-    /// Instantiates a <see cref="Sequence"/> from an array of <see cref="Nucleotide"/>s.
+    /// Instantiates a <see cref="Sequence"/> from an array of <see cref="NBase"/>s.
     /// </summary>
-    /// <param name="sequence">The array of <see cref="Nucleotide"/>s.</param>
-    public Sequence(IReadOnlyList<Nucleotide> sequence)
+    /// <param name="sequence">The array of <see cref="NBase"/>s.</param>
+    public Sequence(IReadOnlyList<NBase> sequence)
     {
         _sequence = sequence.ToArray();
         Counts = new(sequence);
@@ -53,37 +53,37 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
         new(_sequence[start..checked(start + length)]);
 
     /// <summary>
-    /// Returns the <see cref="Nucleotide"/> at the specified index.
+    /// Returns the <see cref="NBase"/> at the specified index.
     /// </summary>
-    /// <param name="i">The index of the <see cref="Nucleotide"/>.</param>
-    /// <returns>The <see cref="Nucleotide"/> at the specified index.</returns>
-    public Nucleotide this[int i] => _sequence[i];
+    /// <param name="i">The index of the <see cref="NBase"/>.</param>
+    /// <returns>The <see cref="NBase"/> at the specified index.</returns>
+    public NBase this[int i] => _sequence[i];
 
     /// <summary>
-    /// Adds a <see cref="Nucleotide"/> to the end of the sequence.
+    /// Adds a <see cref="NBase"/> to the end of the sequence.
     /// </summary>
     /// <param name="sequence">The <see cref="Sequence"/> to add to.</param>
-    /// <param name="nucleotide">The <see cref="Nucleotide"/> to add.</param>
+    /// <param name="nBase">The <see cref="NBase"/> to add.</param>
     /// <returns>New <see cref="Sequence"/></returns>
-    public static Sequence operator +(Sequence sequence, Nucleotide nucleotide)
+    public static Sequence operator +(Sequence sequence, NBase nBase)
     {
-        var newSequence = new Nucleotide[sequence.Length + 1];
+        var newSequence = new NBase[sequence.Length + 1];
         Array.Copy(sequence._sequence, newSequence, sequence.Length);
-        newSequence[sequence.Length] = nucleotide;
+        newSequence[sequence.Length] = nBase;
 
         return new Sequence(newSequence);
     }
 
     /// <summary>
-    /// Add a <see cref="Nucleotide"/> to the beginning of the sequence.
+    /// Add a <see cref="NBase"/> to the beginning of the sequence.
     /// </summary>
-    /// <param name="nucleotide">The <see cref="Nucleotide"/> to add.</param>
+    /// <param name="nBase">The <see cref="NBase"/> to add.</param>
     /// <param name="sequence">The <see cref="Sequence"/> to add to.</param>
     /// <returns>New <see cref="Sequence"/></returns>
-    public static Sequence operator +(Nucleotide nucleotide, Sequence sequence)
+    public static Sequence operator +(NBase nBase, Sequence sequence)
     {
-        var newSequence = new Nucleotide[sequence.Length + 1];
-        newSequence[0] = nucleotide;
+        var newSequence = new NBase[sequence.Length + 1];
+        newSequence[0] = nBase;
         Array.Copy(sequence._sequence, 0, newSequence, 1, sequence.Length);
 
         return new Sequence(newSequence);
@@ -108,10 +108,10 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
         var numberOfMutations = 1 << (2 * length);
         for (var i = 0; i < numberOfMutations; i++)
         {
-            var sequence = new Nucleotide[length];
+            var sequence = new NBase[length];
             for (var j = 0; j < length; j++)
             {
-                sequence[j] = NucleotideHelper.All[(i >> (2 * j)) & 3];
+                sequence[j] = NBaseHelper.All[(i >> (2 * j)) & 3];
             }
 
             yield return new Sequence(sequence);
@@ -120,12 +120,12 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 
     /// <summary>
     /// Returns the complement of the sequence.
-    /// The complement is the sequence where each <see cref="Nucleotide"/> is replaced by its complement.
+    /// The complement is the sequence where each <see cref="NBase"/> is replaced by its complement.
     /// </summary>
     /// <returns>New <see cref="Sequence"/></returns>
     public Sequence Complement()
     {
-        var complement = new Nucleotide[Length];
+        var complement = new NBase[Length];
         for (var i = 0; i < Length; i++)
         {
             complement[i] = _sequence[i].Complement();
@@ -140,7 +140,7 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
     /// <returns>New <see cref="Sequence"/></returns>
     public Sequence Reverse()
     {
-        var reverse = new Nucleotide[Length];
+        var reverse = new NBase[Length];
         for (var i = 0; i < Length; i++)
         {
             reverse[i] = _sequence[Length - i - 1];
@@ -151,12 +151,12 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 
     /// <summary>
     /// Returns the reverse complement of the <see cref="Sequence"/>.
-    /// The reverse complement is the sequence where each <see cref="Nucleotide"/> is replaced by its complement from the end to the beginning.
+    /// The reverse complement is the sequence where each <see cref="NBase"/> is replaced by its complement from the end to the beginning.
     /// </summary>
     /// <returns>New <see cref="Sequence"/></returns>
     public Sequence ReverseComplement()
     {
-        var reverseComplement = new Nucleotide[Length];
+        var reverseComplement = new NBase[Length];
         for (var i = 0; i < Length; i++)
         {
             reverseComplement[i] = _sequence[Length - i - 1].Complement();
@@ -273,9 +273,9 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 
     /// <summary>
     /// Use to find the skew of the sequence for all nucleotides.
-    /// The skew is the difference between the count of <see cref="Nucleotide.G"/> and <see cref="Nucleotide.C"/>.
+    /// The skew is the difference between the count of <see cref="NBase.G"/> and <see cref="NBase.C"/>.
     /// </summary>
-    /// <returns>An array of the skew of the sequence for all <see cref="Nucleotide"/>s.</returns>    
+    /// <returns>An array of the skew of the sequence for all <see cref="NBase"/>s.</returns>    
     public int[] GetSkew()
     {
         var skew = new int[Length + 1];
@@ -283,8 +283,8 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
         {
             skew[i] = skew[i - 1] + _sequence[i - 1] switch
             {
-                Nucleotide.G => 1,
-                Nucleotide.C => -1,
+                NBase.G => 1,
+                NBase.C => -1,
                 _ => 0
             };
         }
@@ -294,7 +294,7 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 
     /// <summary>
     /// Use to find the positions where the skew is minimum.
-    /// The skew is the difference between the count of <see cref="Nucleotide.G"/> and <see cref="Nucleotide.C"/>.
+    /// The skew is the difference between the count of <see cref="NBase.G"/> and <see cref="NBase.C"/>.
     /// </summary>
     /// <returns>An array of positions where the skew is minimum.</returns>
     public int[] GetMinSkewPositions()
@@ -370,7 +370,7 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
 
         if (Length == 1)
         {
-            return NucleotideHelper.All
+            return NBaseHelper.All
                 .Select(n => new Sequence([n]))
                 .ToArray();
         }
@@ -383,9 +383,9 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
         {
             if (suffix.HammingDistance(wobble) < mismatches)
             {
-                foreach (var nucleotide in NucleotideHelper.All)
+                foreach (var nBase in NBaseHelper.All)
                 {
-                    wobbles.Add(nucleotide + wobble);
+                    wobbles.Add(nBase + wobble);
                 }
             }
             else
@@ -401,13 +401,13 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
     /// Use to mutate the <see cref="Sequence"/>> at the specified index.
     /// </summary>
     /// <param name="index">The index to mutate.</param>
-    /// <param name="nucleotide">The <see cref="Nucleotide"/> to mutate to.</param>
+    /// <param name="nBase">The <see cref="NBase"/> to mutate to.</param>
     /// <returns>Mutated <see cref="Sequence"/></returns>
-    public Sequence Mutate(int index, Nucleotide nucleotide)
+    public Sequence Mutate(int index, NBase nBase)
     {
-        var mutated = new Nucleotide[Length];
+        var mutated = new NBase[Length];
         Array.Copy(_sequence, mutated, Length);
-        mutated[index] = nucleotide;
+        mutated[index] = nBase;
 
         return new(mutated);
     }
@@ -448,33 +448,33 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<Nucleotide>
         return true;
     }
 
-    public IEnumerator<Nucleotide> GetEnumerator()
+    public IEnumerator<NBase> GetEnumerator()
     {
-        foreach (var nucleotide in _sequence)
+        foreach (var nBase in _sequence)
         {
-            yield return nucleotide;
+            yield return nBase;
         }
     }
 
     public override int GetHashCode()
     {
         var hash = 17;
-        foreach (var nucleotide in _sequence)
+        foreach (var nBase in _sequence)
         {
-            hash = hash * 31 + nucleotide.GetHashCode();
+            hash = hash * 31 + nBase.GetHashCode();
         }
 
         return hash;
     }
 
-    private static Nucleotide[] GetNucleotides(string sequence)
+    private static NBase[] GetNucleotides(string sequence)
     {
-        var nucleotides = new Nucleotide[sequence.Length];
+        var nBases = new NBase[sequence.Length];
         for (var i = 0; i < sequence.Length; i++)
         {
-            nucleotides[i] = char.ToUpper(sequence[i]).ToNucleotide();
+            nBases[i] = char.ToUpper(sequence[i]).ToNBase();
         }
 
-        return nucleotides;
+        return nBases;
     }
 }

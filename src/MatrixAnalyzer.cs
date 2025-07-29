@@ -6,7 +6,7 @@
 public sealed class MatrixAnalyzer
 {
     private readonly IReadOnlyList<Sequence> _matrix;
-    private readonly IReadOnlyList<ProfiledNucleotideCount> _profiled;
+    private readonly IReadOnlyList<ProfiledNBaseCount> _profiled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MatrixAnalyzer"/> class.
@@ -24,28 +24,29 @@ public sealed class MatrixAnalyzer
         Score = GetScore(columns);
         Entropy = _profiled.Sum(m => m.Entropy);
         Consensus = _profiled
-            .Select(m => m.Max.First().Nucleotide)
+            .Select(m => m.Max.First().NBase)
             .ToArray();
     }
 
     /// <summary>
     /// Gets the score of the regions matrix.
     /// The score shows how "conserved" the matrix of regions is: the lower the score, the more conserved the matrix is.
-    /// Calculated as the sum of the differences between the total count of nucleotides in each column and the count of a nucleotide that appears the most times in that column.
+    /// Calculated as the sum of the differences between the total count of nucleotides in each column and the count of
+    /// a nucleotide base that appears the most times in that column.
     /// For example, if the regions matrix has 10 regions and the first column is all A's, the score of the column is 0.
     /// If the second column has 7 A's, 2 C's, and 1 G, the score of the column is 3.
     /// </summary>
     public int Score { get; }
 
     /// <summary>
-    /// Gets the consensus nucleotides of the regions matrix.
-    /// The consensus nucleotides are the nucleotides that appear the most times in each column of the regions matrix.
+    /// Gets the consensus nucleotide bases of the regions matrix.
+    /// The consensus nucleotide bases are the nucleotide bases that appear the most times in each column of the regions matrix.
     /// </summary>
-    public Nucleotide[] Consensus { get; }
+    public NBase[] Consensus { get; }
 
     /// <summary>
     /// Gets the entropy of the regions matrix.
-    /// Entropy is a measure of the randomness of nucleotides in the matrix.
+    /// Entropy is a measure of the randomness of nucleotide bases in the matrix.
     /// It is the sum of the entropy of each column in the matrix.
     /// </summary>
     public double Entropy { get; }
@@ -95,7 +96,7 @@ public sealed class MatrixAnalyzer
     /// </summary>
     /// <param name="pattern">The pattern to get the probability for.</param>
     /// <returns>The probability of the pattern occurring in the regions matrix.</returns>
-    public double Probability(IReadOnlyList<Nucleotide> pattern) =>
+    public double Probability(IReadOnlyList<NBase> pattern) =>
         Probability(pattern, _profiled);
 
     /// <summary>
@@ -104,26 +105,26 @@ public sealed class MatrixAnalyzer
     /// <param name="pattern">The pattern to get the probability for.</param>
     /// <returns>The probability of the pattern occurring in the regions matrix.</returns>
     public double Probability(string pattern) =>
-        Probability(pattern.Select(c => c.ToNucleotide()).ToArray());
+        Probability(pattern.Select(c => c.ToNBase()).ToArray());
 
     /// <summary>
     /// Gets the most probable pattern from the given patterns.
     /// </summary>
     /// <param name="patterns">The patterns to find the most probable from.</param>
     /// <returns>The most probable pattern.</returns>
-    public IReadOnlyList<Nucleotide> GetMostProbablePattern(
-        IReadOnlyList<IReadOnlyList<Nucleotide>> patterns) =>
+    public IReadOnlyList<NBase> GetMostProbablePattern(
+        IReadOnlyList<IReadOnlyList<NBase>> patterns) =>
             GetMostProbablePattern(patterns, _profiled);
 
     /// <summary>
     /// Gets the probability of a pattern occurring in the regions matrix.
     /// </summary>
     /// <param name="pattern">The pattern to get the probability for.</param>
-    /// <param name="normalized">The normalized nucleotide counts of the regions matrix.</param>
+    /// <param name="normalized">The normalized nucleotide base counts of the regions matrix.</param>
     /// <returns>The probability of the pattern occurring in the regions matrix.</returns>
     private static double Probability(
-        IReadOnlyList<Nucleotide> pattern,
-        IReadOnlyList<ProfiledNucleotideCount> normalized) =>
+        IReadOnlyList<NBase> pattern,
+        IReadOnlyList<ProfiledNBaseCount> normalized) =>
             pattern
                 .Select((n, i) => normalized[i][n])
                 .Aggregate(1.0, (current, p) => current * p);
@@ -134,9 +135,9 @@ public sealed class MatrixAnalyzer
     /// <param name="patterns">The patterns to find the most probable from.</param>
     /// <param name="normalized">The normalized nucleotide counts of the regions matrix.</param>
     /// <returns>The most probable pattern.</returns>
-    private static IReadOnlyList<Nucleotide> GetMostProbablePattern(
-        IReadOnlyList<IReadOnlyList<Nucleotide>> patterns,
-        IReadOnlyList<ProfiledNucleotideCount> normalized)
+    private static IReadOnlyList<NBase> GetMostProbablePattern(
+        IReadOnlyList<IReadOnlyList<NBase>> patterns,
+        IReadOnlyList<ProfiledNBaseCount> normalized)
     {
         var maxProbability = 0.0;
         var mostProbable = patterns[0];
@@ -155,19 +156,19 @@ public sealed class MatrixAnalyzer
     }
 
     /// <summary>
-    /// Counts the number of occurrences of each <see cref="Nucleotide"/> in each column of the given regions.
+    /// Counts the number of occurrences of each <see cref="NBase"/> in each column of the given regions.
     /// </summary>
     /// <param name="regions">The regions to count columns in.</param>
-    /// <returns><see cref="NucleotideCount"/>: The count of each nucleotide in each column.</returns>
+    /// <returns><see cref="NBaseCount"/>: The count of each nucleotide base in each column.</returns>
     /// <exception cref="ArgumentException">Thrown when the regions are not all the same length.</exception>
-    private static IEnumerable<NucleotideCount> CountColumns(IReadOnlyList<Sequence> regions)
+    private static IEnumerable<NBaseCount> CountColumns(IReadOnlyList<Sequence> regions)
     {
         var regionLength = regions[0].Length;
 
-        var columns = new Nucleotide[regionLength][];
+        var columns = new NBase[regionLength][];
         for (var i = 0; i < regionLength; i++)
         {
-            columns[i] = new Nucleotide[regions.Count];
+            columns[i] = new NBase[regions.Count];
         }
 
         for (var i = 0; i < regions.Count; i++)
@@ -183,21 +184,22 @@ public sealed class MatrixAnalyzer
             }
         }
 
-        return columns.Select(c => new NucleotideCount(c));
+        return columns.Select(c => new NBaseCount(c));
     }
 
-    private static ProfiledNucleotideCount[] Profile(IReadOnlyList<Sequence> matrix) =>
+    private static ProfiledNBaseCount[] Profile(IReadOnlyList<Sequence> matrix) =>
         CountColumns(matrix)
             .Select(c => c.Normalize(matrix.Count))
             .ToArray();
 
     /// <summary>
     /// Gets the score of the regions matrix.
-    /// Calculated as the sum of the differences between the total count of nucleotides in each column and the count of a nucleotide that appears the most times in that column.
+    /// Calculated as the sum of the differences between the total count of nucleotide basess
+    /// in each column and the count of a nucleotide base that appears the most times in that column.
     /// </summary>
     /// <param name="columns">The columns to get the score for.</param>
     /// <returns>The score of the regions matrix.</returns>
-    private static int GetScore(IEnumerable<NucleotideCount> columns) =>
+    private static int GetScore(IEnumerable<NBaseCount> columns) =>
         columns.Sum(column => column.Total - column.Max.First().Count);
 
     /// <summary>
