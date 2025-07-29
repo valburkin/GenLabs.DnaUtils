@@ -40,7 +40,7 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<NBase>
     /// </summary>
     /// <param name="sequence">The string to convert to a <see cref="Sequence"/>.</param>
     public Sequence(string sequence)
-        : this(GetNucleotides(sequence))
+        : this(GetNBases(sequence))
     { }
 
     /// <summary>
@@ -467,7 +467,7 @@ public sealed class Sequence : IEquatable<Sequence>, IReadOnlyList<NBase>
         return hash;
     }
 
-    private static NBase[] GetNucleotides(string sequence)
+    private static NBase[] GetNBases(string sequence)
     {
         var nBases = new NBase[sequence.Length];
         for (var i = 0; i < sequence.Length; i++)
