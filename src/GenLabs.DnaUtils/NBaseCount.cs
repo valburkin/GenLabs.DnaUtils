@@ -17,6 +17,8 @@ public readonly struct NBaseCount
     /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid nucleotide base is encountered.</exception>
     public NBaseCount(IReadOnlyCollection<NBase> nBases)
     {
+        ArgumentNullException.ThrowIfNull(nBases);
+
         foreach (var nBase in nBases)
         {
             switch (nBase)
@@ -34,12 +36,13 @@ public readonly struct NBaseCount
                     _t++;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(nBase));
+                    throw new ArgumentOutOfRangeException(nameof(nBases), nBase, "Not a defined nucleotide base.");
             }
         }
 
         Total = nBases.Count;
         Max = GetMax();
+        Entropy = GetEntropy();
     }
 
     /// <summary>
@@ -54,7 +57,7 @@ public readonly struct NBaseCount
         NBase.C => _c,
         NBase.G => _g,
         NBase.T => _t,
-        _ => throw new ArgumentOutOfRangeException(nameof(nBase))
+        _ => throw new ArgumentOutOfRangeException(nameof(nBase)),
     };
 
     /// <summary>
@@ -65,8 +68,14 @@ public readonly struct NBaseCount
     /// <summary>
     /// Gets the maximum <see cref="NBase"/> counts.
     /// </summary>
-    /// <returns>The <see cref="NBase"/>s that appears the most times and its corresponding counts.</returns>
+    /// <returns>The <see cref="NBase"/>s that appear the most times and their corresponding counts.</returns>
     public (NBase NBase, int Count)[] Max { get; }
+
+    /// <summary>
+    /// Gets the Shannon entropy, in bits, of the observed base frequencies:
+    /// the sum of -p log2(p) over the bases that occur. 0 when every base is the same; 2 when all four are equally frequent.
+    /// </summary>
+    public double Entropy { get; }
 
     /// <summary>
     /// Normalizes the <see cref="NBaseCount"/> by a factor.
@@ -94,6 +103,20 @@ public readonly struct NBaseCount
             }
         }
 
-        return max.ToArray();
+        return [.. max];
+    }
+
+    private double GetEntropy()
+    {
+        if (Total == 0)
+        {
+            return 0;
+        }
+
+        double total = Total;
+        return -new[] { _a, _c, _g, _t }
+            .Where(c => c > 0)
+            .Select(c => c / total * Math.Log2(c / total))
+            .Sum();
     }
 }

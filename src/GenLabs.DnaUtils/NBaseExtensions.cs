@@ -1,21 +1,24 @@
 ﻿namespace GenLabs.DnaUtils;
 
+/// <summary>
+/// Conversions and pairing rules for <see cref="NBase"/>.
+/// </summary>
 public static class NBaseExtensions
 {
     /// <summary>
-    /// Converts a character to a <see cref="NBase"/>.
+    /// Converts a character to a <see cref="NBase"/>. Lowercase characters are accepted.
     /// </summary>
     /// <param name="nBase">The character to convert.</param>
     /// <returns>The <see cref="NBase"/>.</returns>
     /// <exception cref="ArgumentException">Thrown when the character is not a valid DNA character.</exception>
     public static NBase ToNBase(this char nBase) =>
-        nBase switch
+        char.ToUpperInvariant(nBase) switch
         {
             'A' => NBase.A,
             'C' => NBase.C,
             'G' => NBase.G,
             'T' => NBase.T,
-            _ => throw new ArgumentException("Invalid DNA character")
+            _ => throw new ArgumentException($"'{nBase}' is not a valid DNA character.", nameof(nBase)),
         };
 
     /// <summary>
@@ -23,7 +26,7 @@ public static class NBaseExtensions
     /// </summary>
     /// <param name="nBase">The <see cref="NBase"/> to convert.</param>
     /// <returns>The character.</returns>
-    /// <exception cref="ArgumentException">Thrown when the <see cref="NBase"/> is not a valid DNA character.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is not a defined <see cref="NBase"/>.</exception>
     public static char ToChar(this NBase nBase) =>
         nBase switch
         {
@@ -31,7 +34,7 @@ public static class NBaseExtensions
             NBase.C => 'C',
             NBase.G => 'G',
             NBase.T => 'T',
-            _ => throw new ArgumentException("Invalid DNA character")
+            _ => throw new ArgumentOutOfRangeException(nameof(nBase)),
         };
 
     /// <summary>
@@ -41,7 +44,7 @@ public static class NBaseExtensions
     /// </summary>
     /// <param name="nBase">The <see cref="NBase"/> to complement.</param>
     /// <returns>The complement.</returns>
-    /// <exception cref="ArgumentException">Thrown when the <see cref="NBase"/> is not a valid DNA character.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is not a defined <see cref="NBase"/>.</exception>
     public static NBase Complement(this NBase nBase) =>
         nBase switch
         {
@@ -49,6 +52,6 @@ public static class NBaseExtensions
             NBase.T => NBase.A,
             NBase.C => NBase.G,
             NBase.G => NBase.C,
-            _ => throw new ArgumentException("Invalid DNA character")
+            _ => throw new ArgumentOutOfRangeException(nameof(nBase)),
         };
 }

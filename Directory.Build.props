@@ -1,0 +1,35 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The .NET 10 recommended analyzers plus .editorconfig code style, enforced at build
+         time. Warnings fail the build. -->
+    <AnalysisLevel>10.0-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Valentin Burkin</Authors>
+    <Description>Genomic sequence analysis for .NET: k-mers, clumps, GC skew, approximate pattern matching and motif search.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>bioinformatics;genomics;dna;k-mer;motif;sequence-analysis</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (c) 2024 Valentin Burkin</Copyright>
+    <PackageProjectUrl>https://github.com/valburkin/GenLabs.DnaUtils</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/valburkin/GenLabs.DnaUtils</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>0.2.0</Version>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+</Project>
