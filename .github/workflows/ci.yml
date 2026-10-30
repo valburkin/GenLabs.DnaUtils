@@ -1,0 +1,43 @@
+# Build, test and pack every change. Every action is pinned to a commit, with its version
+# in a comment (Dependabot updates both).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  RestoreLockedMode: "true"
+
+jobs:
+  dotnet:
+    name: .NET on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet restore GenLabs.DnaUtils.slnx --locked-mode
+      # Analyzers and code style are errors (Directory.Build.props).
+      - run: dotnet build GenLabs.DnaUtils.slnx --configuration Release --no-restore
+      - run: dotnet test GenLabs.DnaUtils.slnx --configuration Release --no-build
+      - run: dotnet pack GenLabs.DnaUtils.slnx --configuration Release --no-build --output artifacts
