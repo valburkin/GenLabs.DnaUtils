@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/GenLabs.DnaUtils/GenLabs.DnaUtils.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GenLabs.DnaUtils.Tests/GenLabs.DnaUtils.Tests.csproj" />
+  </Folder>
 </Solution>
